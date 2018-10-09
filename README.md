@@ -1,3 +1,5 @@
+Simple Angular Web Apps binding data from Google API
+
 1.  Download CoreUI for Angular admin template based on Bootstrap here:
     https://github.com/coreui/coreui-free-angular-admin-template .
     
