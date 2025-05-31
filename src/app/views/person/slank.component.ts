@@ -1,29 +1,28 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy, OnDestroy, ChangeDetectorRef } from "@angular/core";
 import { PersonService } from "../../services/person.service";
+import { Subject } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: "app-slank",
   templateUrl: "slank.component.html",
-  providers: [PersonService]
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SlankComponent implements OnInit {
+export class SlankComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   data: any = [];
   link: string;
 
-  constructor(private personService: PersonService) {}
+  constructor(private personService: PersonService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.getPerson();
   }
 
   getPerson() {
-    this.personService.getPerson("slank").subscribe(res => {
+    this.personService.getPerson("slank").pipe(takeUntil(this.destroy$)).subscribe(res => {
+      this.cdr.markForCheck();
       // this.data = res;
-      console.log(
-        "XXX test",
-        res.itemListElement[0].result.detailedDescription.url,
-        res.itemListElement[0].result.url
-      );
       const url = [
         {
           id: 1,
@@ -42,5 +41,10 @@ export class SlankComponent implements OnInit {
 
   loadFrame(person) {
     this.link = person.link;
+    this.cdr.markForCheck();
   }
 }
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
